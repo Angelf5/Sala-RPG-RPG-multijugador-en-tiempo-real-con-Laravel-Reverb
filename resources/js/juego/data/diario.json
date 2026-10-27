@@ -1,0 +1,21 @@
+{
+    "_info": "Easter egg: el diario arrugado tirado en el piso de la sala (celda 'n' de mapa.json). Para cambiar las noticias, editá este archivo. Lo que va entre comillas invertidas (`así`) se muestra como código.",
+    "cabecera": {
+        "titulo": "EL DIARIO DEL BACKEND",
+        "subtitulo": "Edición especial · Formosa · Precio: 1 commit"
+    },
+    "principal": {
+        "titulo": "CONCURSO DE PROGRAMACIÓN CON FUERTES SOSPECHAS DE ESTAR ARREGLADO",
+        "texto": "El ganador del certamen entregó su solución 3 minutos antes de que se publicaran los enunciados. Al revisar el código, el jurado encontró la línea `if (participante == \"sobrino_del_jurado\") return GANADOR;`. La organización lo defendió: «Es un caso de uso válido». Los demás participantes exigen un rate limiting para los parientes."
+    },
+    "secundarias": [
+        {
+            "titulo": "Programador independiente lanza su servidor: sixdb.syte",
+            "texto": "Un programador formoseño puso en línea sixdb.syte, su propio servidor, armado desde cero con mucho mate y pocas horas de sueño. Promete estar disponible las 24 horas, «salvo cuando se corta la luz en el barrio». Fuentes cercanas confirman que ya superó su primera prueba de fuego: sobrevivir a un `git push --force` un viernes a la noche."
+        },
+        {
+            "titulo": "Claude, la IA que ayuda a los estudiantes",
+            "texto": "La bibliotecaria más paciente de la ciudad ya respondió miles de preguntas sobre WebSockets sin perder la sonrisa. Fuentes cercanas aseguran que un alumno sacó 1 de 5 en su examen. «Para eso está la biblioteca», comentó ella, mientras le recomendaba un libro."
+        }
+    ]
+}

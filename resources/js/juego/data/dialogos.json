@@ -1,0 +1,202 @@
+{
+  "_info": "Diálogos de los NPCs. Cada línea tiene 'expresion' (nombre del retrato) y 'texto'. {nombre} se reemplaza por el nombre del jugador. 'accion' indica algo especial que hace el juego al elegir la opción.",
+  "npcs": {
+    "claude": {
+      "nombre": "Claude",
+      "titulo": "Mentora de la biblioteca",
+      "retratos": {
+        "normal": "claude_normal.png",
+        "feliz": "claude_feliz.png",
+        "pensativa": "claude_pensativa.png"
+      },
+      "saludos": {
+        "manana": [{"expresion": "feliz", "texto": "¡Buen día, {nombre}! Llegaste temprano a la biblioteca de la TUP. ¿Qué querés aprender hoy?"}],
+        "tarde": [{"expresion": "feliz", "texto": "¡Hola, {nombre}! Bienvenido a la biblioteca de la TUP. ¿Qué querés aprender hoy?"}],
+        "noche": [{"expresion": "normal", "texto": "Buenas noches, {nombre}. Estudiando a esta hora… eso es dedicación. ¿En qué te ayudo?"}],
+        "repetido": [
+          {"expresion": "feliz", "texto": "¡Volviste, {nombre}! ¿Seguimos?"},
+          {"expresion": "normal", "texto": "Otra vez por acá, {nombre}. Me gusta. ¿Qué necesitás?"}
+        ]
+      },
+      "opciones": [
+        {
+          "id": "websocket",
+          "etiqueta": "¿Qué es un WebSocket?",
+          "lineas": [
+            {"expresion": "normal", "texto": "Pensalo como una llamada telefónica. HTTP es mandar cartas: preguntás, te responden y se corta."},
+            {"expresion": "normal", "texto": "Con un WebSocket la línea queda abierta, y el servidor te puede hablar cuando quiera, sin que le preguntes."},
+            {"expresion": "feliz", "texto": "Si querés el detalle, está en el estante de Tiempo Real: 'HTTP vs WebSocket'."}
+          ]
+        },
+        {
+          "id": "como-llegan",
+          "etiqueta": "¿Cómo veo moverse a los demás?",
+          "lineas": [
+            {"expresion": "pensativa", "texto": "Mmm… buena pregunta. Tu navegador se unió al canal de presencia 'sala.1' con Echo."},
+            {"expresion": "normal", "texto": "Cada vez que alguien da un paso, su navegador le susurra la posición a Reverb con un whisper, y Reverb te la reenvía al instante."},
+            {"expresion": "feliz", "texto": "¡Esto que estás viendo ahora mismo es tiempo real!"}
+          ]
+        },
+        {
+          "id": "secret",
+          "etiqueta": "¿Por qué el SECRET no va al navegador?",
+          "lineas": [
+            {"expresion": "normal", "texto": "Porque todo lo que llega al navegador lo puede ver cualquiera apretando F12."},
+            {"expresion": "pensativa", "texto": "La KEY es pública: solo identifica la app. Pero el SECRET es la firma de Laravel."},
+            {"expresion": "normal", "texto": "Si se filtra, cualquiera podría hacerse pasar por tu servidor y mandar eventos falsos. Por eso Vite solo expone las variables VITE_."}
+          ]
+        },
+        {
+          "id": "authn-authz",
+          "etiqueta": "¿Autenticación o autorización?",
+          "lineas": [
+            {"expresion": "pensativa", "texto": "Se confunden mucho. Autenticación es ¿quién sos? Autorización es ¿qué podés hacer?"},
+            {"expresion": "normal", "texto": "En el aeropuerto mostrás el DNI: eso es autenticación. Después tu pasaje dice a qué avión podés subir: eso es autorización."},
+            {"expresion": "feliz", "texto": "Y acordate: 401 es 'no sé quién sos', 403 es 'sé quién sos, pero no podés'."}
+          ]
+        },
+        {
+          "id": "presencia",
+          "etiqueta": "¿Qué es un canal de presencia?",
+          "lineas": [
+            {"expresion": "normal", "texto": "Es un canal privado con un superpoder: sabés quién más está conectado."},
+            {"expresion": "normal", "texto": "Echo te da here() con los que ya están, joining() cuando alguien entra y leaving() cuando alguien se va."},
+            {"expresion": "feliz", "texto": "¡Por eso cuando un compañero cierra la pestaña, su personaje desaparece solito!"}
+          ]
+        },
+        {
+          "id": "libro",
+          "etiqueta": "Recomendame un libro",
+          "accion": "recomendar_libro",
+          "lineas": [
+            {"expresion": "pensativa", "texto": "Mmm… a ver, a ver…"},
+            {"expresion": "feliz", "texto": "¡Este te va a gustar! Te marco el estante donde está."}
+          ]
+        },
+        {
+          "id": "examen",
+          "etiqueta": "Tomame examen",
+          "accion": "iniciar_examen",
+          "lineas": [
+            {"expresion": "feliz", "texto": "¡Me encanta! Te voy a hacer 5 preguntas de la materia. Elegí con las flechas y Enter."},
+            {"expresion": "normal", "texto": "Sin presión: si errás, te explico por qué. ¿Lista la cabeza? ¡Vamos!"}
+          ]
+        },
+        {
+          "id": "chau",
+          "etiqueta": "Chau",
+          "cierra": true,
+          "lineas": [
+            {"expresion": "feliz", "texto": "¡Nos vemos, {nombre}! Acordate: leer la documentación también es programar."}
+          ]
+        }
+      ],
+      "examen": {
+        "correcta": [
+          {"expresion": "feliz", "texto": "¡Exacto!"},
+          {"expresion": "feliz", "texto": "¡Muy bien!"},
+          {"expresion": "feliz", "texto": "¡Correcto! Se nota que leíste."}
+        ],
+        "incorrecta": [
+          {"expresion": "pensativa", "texto": "Mmm, no es esa…"},
+          {"expresion": "pensativa", "texto": "Casi, pero no."}
+        ],
+        "final": {
+          "5": {"expresion": "feliz", "texto": "¡5 de 5, {nombre}! Estás listo para el parcial."},
+          "3-4": {"expresion": "feliz", "texto": "¡{puntaje} de 5! Muy bien. Repasá los libros de las que fallaste y estás."},
+          "0-2": {"expresion": "normal", "texto": "{puntaje} de 5. Tranqui, para eso está la biblioteca. Date una vuelta por los estantes y volvé a intentarlo."}
+        }
+      }
+    },
+    "claude_code": {
+      "nombre": "Claude Code",
+      "titulo": "Programador del escritorio",
+      "retratos": {
+        "normal": "code_normal.png",
+        "guino": "code_guino.png",
+        "bug": "code_bug.png"
+      },
+      "saludos": {
+        "manana": [{"expresion": "guino", "texto": "¡Ey, {nombre}! ¿Ya con mate y la terminal abierta? Así me gusta."}],
+        "tarde": [{"expresion": "guino", "texto": "¡Ey, {nombre}! ¿Venís a codear? Tengo la terminal abierta."}],
+        "noche": [{"expresion": "normal", "texto": "Buenas noches, {nombre}. La mejor hora para programar: nadie te interrumpe… salvo los bugs."}],
+        "repetido": [
+          {"expresion": "guino", "texto": "¡Otra vez vos! ¿Qué rompimos ahora?"},
+          {"expresion": "normal", "texto": "Decime, {nombre}, ¿en qué andamos?"}
+        ]
+      },
+      "opciones": [
+        {
+          "id": "comando",
+          "etiqueta": "Dame un comando de artisan",
+          "accion": "al_azar",
+          "pool": "comandos"
+        },
+        {
+          "id": "no-llega",
+          "etiqueta": "¡No me llega el evento!",
+          "lineas": [
+            {"expresion": "bug", "texto": "Clásico. Respirá. Revisemos en orden…"},
+            {"expresion": "normal", "texto": "Uno: ¿está corriendo php artisan reverb:start? Dos: ¿BROADCAST_CONNECTION=reverb en el .env?"},
+            {"expresion": "normal", "texto": "Tres: ¿QUEUE_CONNECTION=sync? Si no, necesitás un php artisan queue:work corriendo."},
+            {"expresion": "normal", "texto": "Cuatro: ¿reiniciaste npm run dev después de tocar el .env? Vite lee las VITE_ solo al arrancar."},
+            {"expresion": "guino", "texto": "Y cinco, el que más duele: si usás broadcastAs(), escuchá con un punto adelante: .listen('.MiEvento')."}
+          ]
+        },
+        {
+          "id": "error-419",
+          "etiqueta": "Me sale error 419",
+          "lineas": [
+            {"expresion": "bug", "texto": "419 es 'Page Expired': Laravel no encontró el token CSRF."},
+            {"expresion": "normal", "texto": "En un formulario Blade agregá @csrf. Si hacés fetch, mandá el header X-CSRF-TOKEN con el valor del meta csrf-token."},
+            {"expresion": "guino", "texto": "Es protección contra CSRF, del libro de OWASP. No lo apagues: arreglalo."}
+          ]
+        },
+        {
+          "id": "debug",
+          "etiqueta": "¿Cómo debuggeo?",
+          "lineas": [
+            {"expresion": "normal", "texto": "En PHP: dd($variable) frena todo y te muestra el contenido. dump() muestra sin frenar."},
+            {"expresion": "normal", "texto": "Para ver los logs en vivo: php artisan pail. Y en el navegador, F12 → Consola y la pestaña Red."},
+            {"expresion": "guino", "texto": "Tip pro: en la pestaña Red filtrá por WS y vas a ver cada mensaje que entra y sale por el WebSocket."}
+          ]
+        },
+        {
+          "id": "tip",
+          "etiqueta": "Un tip rápido",
+          "accion": "al_azar",
+          "pool": "tips"
+        },
+        {
+          "id": "chau",
+          "etiqueta": "Chau",
+          "cierra": true,
+          "lineas": [
+            {"expresion": "guino", "texto": "¡Dale! Que compile a la primera."}
+          ]
+        }
+      ],
+      "pools": {
+        "comandos": [
+          {"expresion": "normal", "texto": "php artisan route:list te muestra todas tus rutas. Ideal cuando un 404 no tiene sentido."},
+          {"expresion": "normal", "texto": "php artisan migrate:fresh --seed borra todo, crea las tablas de nuevo y carga los seeders. Solo en local, ¡eh!"},
+          {"expresion": "normal", "texto": "php artisan make:model Libro -mfs te crea el modelo, la migración, el factory y el seeder de una."},
+          {"expresion": "normal", "texto": "php artisan tinker abre una consola para probar código PHP con tus modelos en vivo."},
+          {"expresion": "normal", "texto": "php artisan make:event MensajeEnviado crea un evento. Agregale 'implements ShouldBroadcast' y ya viaja por Reverb."},
+          {"expresion": "normal", "texto": "php artisan reverb:start --debug te muestra cada conexión y cada mensaje en la terminal."},
+          {"expresion": "normal", "texto": "php artisan config:clear: si cambiaste el .env y Laravel 'no se entera', probá este."},
+          {"expresion": "normal", "texto": "php artisan test corre todos los tests. Con --filter=Chat corre solo los que tengan 'Chat' en el nombre."}
+        ],
+        "tips": [
+          {"expresion": "guino", "texto": "Commiteá seguido y con mensajes claros. 'cambios' no es un mensaje de commit."},
+          {"expresion": "normal", "texto": "Nunca subas el .env a GitHub. Para eso está .env.example, sin los valores secretos."},
+          {"expresion": "guino", "texto": "Si algo funciona y no sabés por qué, todavía no terminaste."},
+          {"expresion": "normal", "texto": "En Blade usá {{ }} y no {!! !!}. El primero escapa el HTML y te salva de un XSS."},
+          {"expresion": "normal", "texto": "Validá siempre en el servidor. La validación del formulario es para la comodidad del usuario; la del servidor es para la seguridad."},
+          {"expresion": "bug", "texto": "Si el error dice 'Class not found' después de crear un archivo, probá composer dump-autoload."},
+          {"expresion": "guino", "texto": "Leé el mensaje de error completo antes de googlearlo. La mitad de las veces te dice exactamente qué pasa."}
+        ]
+      }
+    }
+  }
+}

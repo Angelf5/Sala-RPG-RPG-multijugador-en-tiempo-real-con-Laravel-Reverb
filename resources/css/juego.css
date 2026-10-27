@@ -1,0 +1,1729 @@
+/* Estilos del juego (sin Tailwind). Paleta: maderas, crema y UI oscura semitransparente. */
+
+:root {
+    --crema: #f3e6d0;
+    --oscuro: #2a1e17;
+    --ui: rgba(15, 12, 20, 0.92);
+    --fuente-ui: var(--font-poppins, "Poppins"), system-ui, sans-serif;
+    --fuente-pixel: var(--font-press-start, "Press Start 2P"), monospace;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden; /* nunca barras de scroll: el juego entra en la ventana */
+    background: #000;
+    color: var(--crema);
+    font-family: var(--fuente-ui);
+}
+
+canvas {
+    image-rendering: pixelated;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+.boton {
+    font: 600 0.95rem var(--fuente-ui);
+    color: var(--oscuro);
+    background: var(--crema);
+    border: 0;
+    border-radius: 6px;
+    padding: 0.6rem 1.4rem;
+    cursor: pointer;
+}
+
+.boton:hover {
+    background: #fff;
+}
+
+.boton:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+}
+
+/* ───── Pantalla de carga ───── */
+
+.carga {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    background: #000;
+    transition: opacity 0.6s ease;
+    z-index: 10;
+}
+
+.carga--saliendo {
+    opacity: 0;
+}
+
+.carga-titulo {
+    margin: 0 0 1rem;
+    font: 1.1rem var(--fuente-pixel);
+    letter-spacing: 0.6em;
+    padding-left: 0.6em; /* compensa el espacio extra de la última letra */
+    color: #fff;
+}
+
+.carga-pista {
+    position: relative;
+    width: min(300px, 80vw);
+    padding-top: 96px; /* lugar para el personaje */
+}
+
+.carga-personaje {
+    position: absolute;
+    bottom: 6px;
+    left: 0;
+    width: 64px;
+    height: 96px;
+    transform: translateX(-50%);
+}
+
+.carga-barra {
+    height: 4px;
+    background: #333;
+}
+
+.carga-relleno {
+    width: 0;
+    height: 100%;
+    background: #fff;
+}
+
+.carga-porcentaje {
+    margin: 0;
+    font: 0.75rem var(--fuente-pixel);
+    color: #bbb;
+}
+
+.carga-error {
+    max-width: 28rem;
+    padding: 1rem 1.25rem;
+    text-align: center;
+    background: var(--ui);
+    border: 2px solid var(--crema);
+    border-radius: 8px;
+}
+
+.carga-error p {
+    margin: 0 0 1rem;
+    line-height: 1.5;
+}
+
+/* ───── Sala ───── */
+
+.sala {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #000;
+}
+
+.sala canvas {
+    display: block;
+}
+
+/* ───── HUD ───── */
+
+.hud {
+    position: fixed;
+    inset: 0;
+    pointer-events: none; /* que no robe clics ni foco al juego */
+    z-index: 5;
+}
+
+.hud-estado {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    max-width: calc(100vw - 32px);
+    box-sizing: border-box;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    background: var(--ui);
+    border: 2px solid var(--crema);
+    border-radius: 999px;
+}
+
+.hud-wifi {
+    display: flex;
+}
+
+.hud-contador {
+    font: 0.7rem var(--fuente-pixel);
+    color: #fff;
+    line-height: 1;
+}
+
+.hud-toasts {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.toast {
+    padding: 8px 16px;
+    font: 600 0.85rem var(--fuente-ui);
+    color: var(--crema);
+    background: var(--ui);
+    border: 2px solid var(--crema);
+    border-radius: 8px;
+    white-space: nowrap;
+    animation: toast-entra 0.25s ease-out;
+    transition: opacity 0.4s, transform 0.4s;
+}
+
+.toast--saliendo {
+    opacity: 0;
+    transform: translateY(-6px);
+}
+
+@keyframes toast-entra {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+}
+
+.hud-ayuda {
+    position: absolute;
+    right: 12px;
+    bottom: 8px;
+    margin: 0;
+    font-size: 0.72rem;
+    color: rgba(243, 230, 208, 0.75);
+    text-shadow: 0 1px 2px #000;
+}
+
+.toast--error {
+    border-color: #ff8a7a;
+    color: #ffd9d3;
+}
+
+/* ───── Chat ───── */
+
+.chat {
+    position: absolute;
+    left: 12px;
+    bottom: 8px;
+    width: min(360px, calc(100vw - 24px));
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    pointer-events: auto;
+}
+
+.chat-historial {
+    background: rgba(15, 12, 20, 0.75);
+    border: 2px solid rgba(243, 230, 208, 0.6);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.chat-titulo {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 10px;
+    font: 0.6rem var(--fuente-pixel);
+    letter-spacing: 0.1em;
+    color: var(--crema);
+    background: rgba(243, 230, 208, 0.08);
+    border: 0;
+    cursor: pointer;
+}
+
+.chat-titulo:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: -2px;
+}
+
+.chat-flecha {
+    transition: transform 0.2s;
+}
+
+.chat-lista {
+    list-style: none;
+    margin: 0;
+    padding: 6px 10px;
+    max-height: 9.5rem;
+    overflow-y: auto;
+    font-size: 0.8rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.chat-lista li + li {
+    margin-top: 2px;
+}
+
+.chat-hora {
+    margin-right: 6px;
+    font-size: 0.68rem;
+    color: rgba(243, 230, 208, 0.45);
+}
+
+.chat-nombre {
+    font-weight: 700;
+    text-shadow: 0 1px 1px #000;
+}
+
+.chat-historial--plegado .chat-lista {
+    display: none;
+}
+
+.chat-historial--plegado .chat-flecha {
+    transform: rotate(-90deg);
+}
+
+.chat-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px 4px 4px;
+    background: var(--ui);
+    border: 2px solid var(--crema);
+    border-radius: 8px;
+}
+
+.chat-form input {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 8px;
+    font: 0.9rem var(--fuente-ui);
+    color: #fff;
+    background: transparent;
+    border: 0;
+    outline: none;
+}
+
+.chat-form input::placeholder {
+    color: rgba(243, 230, 208, 0.4);
+}
+
+.chat-contador {
+    font: 0.55rem var(--fuente-pixel);
+    color: rgba(243, 230, 208, 0.6);
+}
+
+.chat-contador--lleno {
+    color: #ff8a7a;
+}
+
+.chat-pista {
+    margin: 0;
+    font-size: 0.72rem;
+    color: rgba(243, 230, 208, 0.6);
+    text-shadow: 0 1px 2px #000;
+}
+
+/* Hay lugar al costado del mapa: el chat va ahí, fuera del juego. */
+.hud--lateral .chat {
+    width: min(400px, calc(var(--margen) - 28px));
+}
+
+.hud--lateral .chat-lista {
+    max-height: min(55vh, 26rem);
+}
+
+/* Ventana angosta: el chat queda encima del mapa, así que se hace más discreto. */
+.chat--superpuesto .chat-historial {
+    background: rgba(15, 12, 20, 0.45);
+    border-color: rgba(243, 230, 208, 0.3);
+    transition: background 0.2s;
+}
+
+.chat--superpuesto .chat-historial:hover {
+    background: rgba(15, 12, 20, 0.85);
+}
+
+.chat--superpuesto .chat-lista {
+    max-height: 6.5rem;
+}
+
+/* ───── Ventanas (menú de estante, libro) ───── */
+
+.modales {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    pointer-events: none;
+}
+
+.modal {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.55);
+    pointer-events: auto;
+    outline: none;
+    animation: modal-entra 0.15s ease-out;
+}
+
+@keyframes modal-entra {
+    from {
+        opacity: 0;
+    }
+}
+
+.modal-ayuda {
+    margin: 0;
+    padding-top: 10px;
+    text-align: center;
+    font-size: 0.72rem;
+    color: rgba(243, 230, 208, 0.6);
+}
+
+.icono-pixel {
+    flex-shrink: 0;
+    image-rendering: pixelated;
+}
+
+/* Menú del estante */
+
+.menu-estante {
+    width: min(460px, 100%);
+    max-height: calc(100vh - 32px);
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    background: var(--ui);
+    border: 3px double var(--crema);
+    border-radius: 10px;
+    box-shadow: 0 0 0 2px var(--color-estante), 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+.menu-estante-cabecera {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 12px;
+    margin-bottom: 8px;
+    border-bottom: 2px solid rgba(243, 230, 208, 0.2);
+}
+
+.menu-estante-titulo {
+    margin: 0 0 6px;
+    font: 0.95rem var(--fuente-pixel);
+    color: #fff;
+}
+
+.menu-estante-descripcion {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: rgba(243, 230, 208, 0.75);
+}
+
+.menu-estante-libros {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+}
+
+.menu-libro {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 7px 10px 7px 26px;
+    position: relative;
+    text-align: left;
+    font: 0.9rem var(--fuente-ui);
+    color: var(--crema);
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.menu-libro--elegido {
+    color: #fff;
+    background: rgba(243, 230, 208, 0.12);
+}
+
+/* Flechita de selección estilo RPG */
+.menu-libro--elegido::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    border: 5px solid transparent;
+    border-left: 7px solid var(--crema);
+    transform: translateY(-50%);
+}
+
+.menu-libro-clase {
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    color: rgba(243, 230, 208, 0.55);
+}
+
+/* Libro abierto */
+
+.libro {
+    width: min(880px, 100%);
+    max-height: calc(100vh - 32px);
+    display: flex;
+    flex-direction: column;
+    padding: 14px 16px 12px;
+    background: #6b4430;
+    border: 3px solid #2a1e17;
+    border-radius: 10px;
+    box-shadow: inset 0 0 0 3px #8a5a3b, 0 14px 40px rgba(0, 0, 0, 0.6);
+}
+
+.libro-cabecera {
+    padding: 0 6px 10px;
+    color: var(--crema);
+}
+
+.libro-etiqueta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 6px;
+    font-size: 0.75rem;
+    color: rgba(243, 230, 208, 0.75);
+}
+
+.libro-titulo {
+    margin: 0;
+    font: 1rem/1.4 var(--fuente-pixel);
+    color: #fff;
+    text-shadow: 2px 2px 0 #2a1e17;
+}
+
+.libro-paginas {
+    display: grid;
+    grid-template-columns: 1fr;
+    min-height: 0;
+    overflow-y: auto;
+    background: #f6ecd8;
+    border-radius: 4px;
+    box-shadow: inset 0 0 0 2px #e2d3b5;
+}
+
+/* Dos páginas: un lomo sombreado al medio */
+.libro-paginas--doble {
+    grid-template-columns: 1fr 1fr;
+    background: linear-gradient(90deg, #f6ecd8 0, #f6ecd8 calc(50% - 14px), #d9c6a2 50%, #f6ecd8 calc(50% + 14px), #f6ecd8 100%);
+}
+
+.pagina {
+    position: relative;
+    min-height: 300px;
+    padding: 22px 26px 36px;
+    color: #2a1e17;
+}
+
+.pagina-texto {
+    margin: 0 0 14px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    white-space: pre-line;
+}
+
+.pagina-codigo {
+    margin: 0;
+    padding: 12px 14px;
+    overflow-x: auto;
+    font: 0.8rem/1.5 ui-monospace, 'Cascadia Code', Consolas, monospace;
+    color: #d6f5dd;
+    background: #1b1b22;
+    border-left: 4px solid var(--color-estante);
+    border-radius: 6px;
+}
+
+.pagina-numero {
+    position: absolute;
+    bottom: 12px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font: 0.6rem var(--fuente-pixel);
+    color: rgba(42, 30, 23, 0.45);
+}
+
+/* La página "En este juego…" se destaca: es donde el libro apunta al código de verdad */
+.pagina--juego {
+    margin: 12px;
+    padding-top: 18px;
+    background: #fff7e2;
+    border: 3px dashed var(--color-estante);
+    border-radius: 10px;
+}
+
+.pagina-juego-titulo {
+    margin: 0 0 12px;
+    font: 0.8rem/1.5 var(--fuente-pixel);
+    color: #2a1e17;
+}
+
+.libro-cargando {
+    margin: 0;
+    padding: 60px 20px;
+    text-align: center;
+    color: #6b4430;
+}
+
+.libro-pie {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 10px;
+}
+
+.libro-numero {
+    font: 0.65rem var(--fuente-pixel);
+    color: var(--crema);
+}
+
+.libro-flecha {
+    width: 40px;
+    height: 32px;
+    font: 1rem var(--fuente-pixel);
+    color: #2a1e17;
+    background: var(--crema);
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.libro-flecha:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.libro-flecha:focus-visible,
+.menu-libro:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+/* ───── Diálogos con los NPCs ───── */
+
+/* Sin oscurecer la sala: la charla pasa "dentro" del juego. */
+.modal--dialogo {
+    align-items: flex-end;
+    padding: 0 16px 16px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.45), transparent 45%);
+}
+
+.dialogo {
+    position: relative;
+    width: min(960px, 100%);
+    padding-top: 230px; /* lugar para el retrato que sobresale */
+}
+
+.dialogo-retrato {
+    position: absolute;
+    left: 8px;
+    bottom: calc(100% - 230px - 70px); /* los pies del retrato quedan dentro de la caja */
+    width: 240px;
+    height: 300px;
+    object-fit: contain;
+    pointer-events: none;
+    filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.35));
+}
+
+.dialogo-caja {
+    position: relative;
+    min-height: 120px;
+    padding: 26px 22px 18px 268px; /* a la izquierda queda el retrato */
+    background: var(--ui);
+    border: 4px double var(--crema);
+    border-radius: 10px;
+    box-shadow: 0 0 0 2px #2a1e17, 0 10px 30px rgba(0, 0, 0, 0.6);
+    cursor: pointer;
+}
+
+.dialogo-cartel {
+    position: absolute;
+    top: -16px;
+    left: 258px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 6px 12px;
+    background: #2a1e17;
+    border: 2px solid var(--crema);
+    border-radius: 6px;
+}
+
+.dialogo-nombre {
+    font: 0.75rem var(--fuente-pixel);
+    color: #fff;
+}
+
+.dialogo-titulo {
+    font-size: 0.7rem;
+    color: rgba(243, 230, 208, 0.65);
+}
+
+.dialogo-texto {
+    margin: 0;
+    min-height: 3.2em;
+    font-size: 1.02rem;
+    line-height: 1.6;
+    color: #fff;
+}
+
+.dialogo-seguir {
+    position: absolute;
+    right: 18px;
+    bottom: 10px;
+    font-size: 0.7rem;
+    color: var(--crema);
+    animation: dialogo-rebote 0.8s ease-in-out infinite;
+}
+
+@keyframes dialogo-rebote {
+    50% {
+        transform: translateY(3px);
+    }
+}
+
+.dialogo-menu {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 16px;
+    margin: 12px 0 0;
+    padding: 10px 0 0;
+    border-top: 1px solid rgba(243, 230, 208, 0.2);
+}
+
+.dialogo-opcion {
+    width: 100%;
+    position: relative;
+    padding: 5px 8px 5px 24px;
+    text-align: left;
+    font: 0.9rem var(--fuente-ui);
+    color: var(--crema);
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.dialogo-opcion--elegida {
+    color: #fff;
+    background: rgba(243, 230, 208, 0.12);
+}
+
+.dialogo-opcion--elegida::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    border: 5px solid transparent;
+    border-left: 7px solid var(--crema);
+    transform: translateY(-50%);
+}
+
+/* Pantallas angostas: retrato más chico y una sola columna de opciones. */
+@media (max-width: 700px) {
+    .dialogo {
+        padding-top: 150px;
+    }
+
+    .dialogo-retrato {
+        width: 140px;
+        height: 175px;
+        bottom: calc(100% - 150px - 25px);
+    }
+
+    .dialogo-caja {
+        padding: 30px 16px 16px;
+    }
+
+    .dialogo-cartel {
+        left: 150px;
+    }
+
+    .dialogo-menu {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Examen: opciones largas, una por renglón */
+.dialogo-menu--una {
+    grid-template-columns: 1fr;
+}
+
+/* ───── Botones del HUD (arriba a la izquierda) ───── */
+
+.hud-botones {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: auto;
+}
+
+.hud-boton {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    background: var(--crema);
+    border: 2px solid #3d2b5a;
+    border-radius: 50%;
+    box-shadow: 0 3px 0 #3d2b5a;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.hud-boton:hover {
+    transform: translateY(-1px);
+    background: #fff;
+}
+
+.hud-boton:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #3d2b5a;
+}
+
+.hud-boton:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+}
+
+/* ───── Paneles (Ajustes, Info, Jugadores) ───── */
+
+.panel {
+    width: min(440px, 100%);
+    max-height: calc(100vh - 32px);
+    display: flex;
+    flex-direction: column;
+    padding: 16px 18px;
+    background: var(--ui);
+    border: 3px double var(--crema);
+    border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+.panel-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 10px;
+    margin-bottom: 6px;
+    border-bottom: 2px solid rgba(243, 230, 208, 0.2);
+}
+
+.panel-titulo {
+    margin: 0;
+    font: 0.9rem var(--fuente-pixel);
+    color: #fff;
+}
+
+.panel-cerrar {
+    width: 30px;
+    height: 30px;
+    font-size: 0.9rem;
+    color: var(--crema);
+    background: transparent;
+    border: 2px solid rgba(243, 230, 208, 0.4);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.panel-cuerpo {
+    overflow-y: auto;
+    font-size: 0.9rem;
+}
+
+.panel-grupo {
+    margin: 10px 0 0;
+    padding: 8px 12px 10px;
+    border: 1px solid rgba(243, 230, 208, 0.25);
+    border-radius: 8px;
+}
+
+.panel-grupo legend {
+    padding: 0 6px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.panel-opcion {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    padding: 3px 0;
+    cursor: pointer;
+}
+
+.panel-opcion input,
+.panel-volumen input {
+    accent-color: #c4673f;
+}
+
+.panel-volumen {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.panel-volumen input {
+    flex: 1;
+}
+
+.panel-valor {
+    margin: 4px 0;
+    font: 0.6rem var(--fuente-pixel);
+    color: rgba(243, 230, 208, 0.75);
+}
+
+.panel-salir {
+    margin-top: 14px;
+    text-align: right;
+}
+
+.boton--secundario {
+    color: var(--crema);
+    background: transparent;
+    border: 2px solid rgba(243, 230, 208, 0.5);
+}
+
+.boton--secundario:hover {
+    color: #2a1e17;
+}
+
+.panel-subtitulo {
+    margin: 12px 0 6px;
+    font: 0.65rem var(--fuente-pixel);
+    color: #fff;
+}
+
+.panel-controles {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 4px 14px;
+    margin: 0;
+}
+
+.panel-controles dt {
+    font-weight: 600;
+    color: #fff;
+}
+
+.panel-controles dd {
+    margin: 0;
+    color: rgba(243, 230, 208, 0.8);
+}
+
+.panel-creditos p {
+    margin: 0 0 8px;
+    line-height: 1.45;
+    color: rgba(243, 230, 208, 0.8);
+}
+
+.panel-destacado {
+    font-weight: 700;
+    color: #fff !important;
+}
+
+.panel-jugadores {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.panel-jugadores li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 2px;
+    border-bottom: 1px solid rgba(243, 230, 208, 0.08);
+}
+
+/* ───── Controles táctiles ───── */
+
+.tactil {
+    position: fixed;
+    inset: auto 0 0 0;
+    height: 0;
+    z-index: 15;
+}
+
+.tactil-pad,
+.tactil-acciones {
+    position: fixed;
+    bottom: 18px;
+    display: grid;
+    gap: 6px;
+}
+
+.tactil-pad {
+    left: 18px;
+    grid-template: repeat(3, 52px) / repeat(3, 52px);
+}
+
+.tactil-arriba { grid-area: 1 / 2; }
+.tactil-izquierda { grid-area: 2 / 1; }
+.tactil-derecha { grid-area: 2 / 3; }
+.tactil-abajo { grid-area: 3 / 2; }
+
+/* Dos botones redondos iguales en la misma fila: 💬 a la izquierda y A a la derecha. */
+.tactil-acciones {
+    right: 18px;
+    grid-template: 60px / 60px 60px;
+    gap: 12px;
+}
+
+.tactil-boton {
+    width: 100%;
+    height: 100%;
+    font: 1rem var(--fuente-pixel);
+    color: #2a1e17;
+    background: rgba(243, 230, 208, 0.75);
+    border: 2px solid #3d2b5a;
+    border-radius: 12px;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.tactil-a,
+.tactil-chat {
+    border-radius: 50%;
+}
+
+.tactil-chat { grid-area: 1 / 1; }
+.tactil-a { grid-area: 1 / 2; }
+
+.tactil-a {
+    background: rgba(196, 103, 63, 0.85);
+    color: #fff;
+}
+
+.tactil-boton:active {
+    background: #fff;
+}
+
+.tactil-chat {
+    font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+    font-size: 1.3rem;
+}
+
+/* En táctil, la ayuda de teclas no sirve y el chat se corre para no quedar debajo del d-pad */
+.es-tactil .hud-ayuda,
+.es-tactil .chat-pista {
+    display: none;
+}
+
+/* En táctil el historial está "dentro" del botón 💬: no hay barra plegada tapando el mapa. */
+.es-tactil .chat-historial {
+    display: none;
+}
+
+/* ───── Botón ✕ de las ventanas ───── */
+
+.boton-cerrar {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    margin-left: auto;
+    font-size: 1rem;
+    color: var(--crema);
+    background: rgba(0, 0, 0, 0.25);
+    border: 2px solid rgba(243, 230, 208, 0.45);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.boton-cerrar:hover {
+    background: rgba(243, 230, 208, 0.15);
+}
+
+.libro-cabecera {
+    position: relative;
+    padding-right: 48px;
+}
+
+.libro-cabecera .boton-cerrar {
+    position: absolute;
+    top: 0;
+    right: 6px;
+}
+
+.dialogo-caja > .boton-cerrar {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem;
+}
+
+/* Botones de enviar / cancelar del chat */
+.chat-accion {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+    color: var(--crema);
+    background: transparent;
+    border: 1px solid rgba(243, 230, 208, 0.35);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* ───── Celular / táctil ───── */
+
+body {
+    touch-action: manipulation; /* sin zoom por doble toque */
+}
+
+#pantalla,
+.tactil {
+    touch-action: none;
+}
+
+.es-tactil .tactil-pad {
+    left: calc(14px + env(safe-area-inset-left));
+    bottom: calc(14px + env(safe-area-inset-bottom));
+}
+
+.es-tactil .tactil-acciones {
+    right: calc(14px + env(safe-area-inset-right));
+    bottom: calc(14px + env(safe-area-inset-bottom));
+}
+
+.es-tactil .hud-botones {
+    top: calc(10px + env(safe-area-inset-top));
+    left: calc(10px + env(safe-area-inset-left));
+}
+
+.es-tactil .hud-estado {
+    top: calc(10px + env(safe-area-inset-top));
+    right: calc(10px + env(safe-area-inset-right));
+}
+
+/* Con una ventana abierta (libro, diálogo…) los controles no tapan nada. */
+.hay-modal .tactil {
+    display: none;
+}
+
+/* Chat abierto en celular: barra a lo ancho, siempre arriba del teclado virtual. */
+.es-tactil.chat-abierto .chat-form {
+    position: fixed;
+    left: calc(8px + env(safe-area-inset-left));
+    right: calc(8px + env(safe-area-inset-right));
+    bottom: calc(var(--teclado, 0px) + 8px);
+    z-index: 30;
+}
+
+.es-tactil.chat-abierto .tactil {
+    display: none;
+}
+
+.es-tactil .chat-form input {
+    font-size: 16px; /* con menos, iOS hace zoom al enfocar el input */
+}
+
+/* Dedos: opciones y botones más grandes */
+.es-tactil .dialogo-opcion,
+.es-tactil .menu-libro {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.es-tactil .libro-flecha {
+    width: 56px;
+    height: 44px;
+}
+
+.es-tactil .chat-accion {
+    width: 40px;
+    height: 40px;
+}
+
+/* Pantallas bajas (celular horizontal): diálogo y libro compactos para que entren. */
+@media (max-height: 520px) {
+    .dialogo {
+        padding-top: 70px;
+    }
+
+    .dialogo-retrato {
+        width: 96px;
+        height: 120px;
+        bottom: calc(100% - 70px - 50px);
+    }
+
+    .dialogo-caja {
+        min-height: 0;
+        padding: 22px 48px 10px 112px;
+    }
+
+    .dialogo-cartel {
+        left: 104px;
+    }
+
+    .dialogo-texto {
+        min-height: 0;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    /* Todo el alto que deja la caja: las opciones entran sin tener que deslizar. */
+    .dialogo-menu {
+        margin-top: 6px;
+        padding-top: 6px;
+        max-height: calc(100vh - 150px);
+        max-height: calc(100dvh - 150px);
+        overflow-y: auto;
+    }
+
+    .dialogo-opcion,
+    .es-tactil .dialogo-opcion {
+        padding-top: 7px;
+        padding-bottom: 7px;
+        font-size: 0.85rem;
+    }
+
+    /* Pantalla baja pero ancha (celular horizontal): dos columnas aunque mida menos de 700 px.
+       Las opciones del examen siguen de a una porque son largas. */
+    .dialogo-menu:not(.dialogo-menu--una) {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .pagina {
+        min-height: 0;
+        padding: 14px 18px 30px;
+    }
+
+    .libro {
+        padding: 8px 10px;
+    }
+
+    .libro-cabecera {
+        padding-bottom: 6px;
+    }
+
+    .libro .modal-ayuda,
+    .menu-estante .modal-ayuda {
+        display: none;
+    }
+
+    .menu-estante-descripcion {
+        display: none;
+    }
+}
+
+/* Celular vertical: el retrato del diálogo más chico y opciones de a una por renglón. */
+@media (max-width: 520px) {
+    .dialogo {
+        padding-top: 110px;
+    }
+
+    .dialogo-retrato {
+        width: 104px;
+        height: 130px;
+        bottom: calc(100% - 110px - 20px);
+    }
+
+    .dialogo-caja {
+        padding: 28px 14px 14px;
+    }
+
+    .dialogo-cartel {
+        left: 112px;
+    }
+
+    .dialogo-titulo {
+        display: none;
+    }
+
+    .modal {
+        padding: 8px;
+    }
+
+    .pagina {
+        padding: 16px 16px 30px;
+    }
+}
+
+/* Táctil: al tocar 💬 se abre el input y, justo arriba, el historial completo. */
+.es-tactil.chat-abierto .chat-historial {
+    display: block;
+    position: fixed;
+    left: calc(8px + env(safe-area-inset-left));
+    right: calc(8px + env(safe-area-inset-right));
+    bottom: calc(var(--teclado, 0px) + 72px);
+    z-index: 30;
+    background: var(--ui);
+    border-color: rgba(243, 230, 208, 0.6);
+}
+
+.es-tactil.chat-abierto .chat-lista {
+    max-height: max(3rem, calc(100dvh - var(--teclado, 0px) - 150px));
+}
+
+.es-tactil.chat-abierto .chat-titulo {
+    pointer-events: none; /* acá no se pliega: se cierra con ✕ */
+}
+
+.tactil-chat {
+    position: relative;
+}
+
+.tactil-globito {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    font: 0.55rem/20px var(--fuente-pixel);
+    color: #fff;
+    background: #c4673f;
+    border: 2px solid #2a1e17;
+    border-radius: 999px;
+}
+
+/* ───── Easter egg: el diario viejo ───── */
+
+.modal--diario {
+    padding: 16px;
+}
+
+.diario {
+    position: relative;
+    width: min(820px, 100%);
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+    padding: 26px 34px 30px;
+    color: #2b2219;
+    font-family: var(--font-diario, "Old Standard TT"), Georgia, "Times New Roman", serif;
+    /* Papel amarillento: manchas de humedad, bordes más oscuros y un leve doblez al medio */
+    background:
+        radial-gradient(ellipse at 18% 22%, rgba(150, 110, 40, 0.16), transparent 40%),
+        radial-gradient(ellipse at 82% 78%, rgba(120, 85, 30, 0.18), transparent 45%),
+        radial-gradient(circle at 70% 15%, rgba(160, 120, 50, 0.12) 0 6%, transparent 7%),
+        linear-gradient(90deg, transparent 49.6%, rgba(90, 65, 30, 0.12) 50%, transparent 50.4%),
+        radial-gradient(ellipse at center, #f1e4c2 55%, #dcc79a 100%);
+    border-radius: 3px;
+    box-shadow: 0 0 0 1px rgba(80, 60, 30, 0.35), 0 18px 50px rgba(0, 0, 0, 0.65), inset 0 0 60px rgba(110, 80, 30, 0.25);
+    transform: rotate(-0.6deg); /* quedó un poco torcido después de estar tirado */
+}
+
+.diario .boton-cerrar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #2b2219;
+    background: rgba(255, 250, 235, 0.5);
+    border-color: rgba(43, 34, 25, 0.5);
+}
+
+.diario-cabecera {
+    text-align: center;
+    padding-bottom: 8px;
+    border-bottom: 4px double #2b2219;
+}
+
+.diario-titulo {
+    margin: 0;
+    font: 400 clamp(1.7rem, 5.5vw, 3.1rem)/1.1 var(--font-gotica, "UnifrakturMaguntia"), "Old English Text MT", serif;
+    letter-spacing: 0.01em;
+}
+
+.diario-subtitulo {
+    margin: 8px 0 0;
+    padding: 4px 0;
+    font-size: 0.85rem;
+    font-style: italic;
+    letter-spacing: 0.06em;
+    border-top: 1px solid #2b2219;
+}
+
+.diario-principal {
+    padding: 14px 0 12px;
+    border-bottom: 2px solid #2b2219;
+}
+
+.diario-titular {
+    margin: 0 0 10px;
+    font-size: clamp(1.25rem, 3.4vw, 1.95rem);
+    font-weight: 700;
+    line-height: 1.12;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.diario-titular-chico {
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.diario-texto {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    text-align: justify;
+    hyphens: auto;
+    /* Tinta un poco gastada */
+    text-shadow: 0 0 0.5px rgba(43, 34, 25, 0.5);
+}
+
+/* Letra capital, como en los diarios de antes */
+.diario-texto--columnas::first-letter {
+    float: left;
+    margin: 4px 6px 0 0;
+    font-size: 2.9rem;
+    font-weight: 700;
+    line-height: 0.8;
+}
+
+.diario-texto--columnas {
+    columns: 2;
+    column-gap: 26px;
+    column-rule: 1px solid rgba(43, 34, 25, 0.4);
+}
+
+.diario-secundarias {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 26px;
+    padding-top: 14px;
+}
+
+.diario-nota + .diario-nota {
+    padding-left: 26px;
+    border-left: 1px solid rgba(43, 34, 25, 0.4);
+}
+
+/* Celular: todo en una sola columna */
+@media (max-width: 640px) {
+    .diario {
+        padding: 22px 18px 22px;
+        transform: none;
+    }
+
+    .diario-texto--columnas {
+        columns: 1;
+    }
+
+    /* En columna angosta, justificar deja huecos enormes (sobre todo junto al código) */
+    .diario-texto {
+        text-align: left;
+    }
+
+    .diario-secundarias {
+        grid-template-columns: 1fr;
+    }
+
+    .diario-nota + .diario-nota {
+        margin-top: 14px;
+        padding: 14px 0 0;
+        border-left: 0;
+        border-top: 1px solid rgba(43, 34, 25, 0.4);
+    }
+}
+
+.diario-codigo {
+    padding: 0 3px;
+    font: 0.82em/1.3 ui-monospace, "Cascadia Code", Consolas, monospace;
+    background: rgba(43, 34, 25, 0.08);
+    border-radius: 2px;
+}
+
+/* Fundido al cruzar una puerta (cambio de sala) */
+#pantalla {
+    transition: opacity 0.18s ease;
+}
+
+.sala--fundido #pantalla {
+    opacity: 0;
+}
+
+/* ───── Reto a duelo: menú del jugador e invitación ───── */
+
+.reto {
+    width: min(360px, 100%);
+    padding: 16px 18px;
+    background: var(--ui);
+    border: 3px double var(--crema);
+    border-radius: 10px;
+    box-shadow: 0 0 0 2px #c0392b, 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+.reto-cabecera {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.reto-titulo {
+    margin: 0;
+    font: 0.85rem var(--fuente-pixel);
+    color: #fff;
+}
+
+.reto-titulo--grande {
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    text-align: center;
+    color: #ffd34d;
+    text-shadow: 2px 2px 0 #7a1f17;
+}
+
+.reto-texto {
+    margin: 0 0 12px;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.reto-opciones {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.reto-opciones--fila {
+    flex-direction: row;
+}
+
+.reto-opciones--fila .reto-boton {
+    flex: 1;
+}
+
+.reto-boton {
+    padding: 10px 14px;
+    font: 600 0.95rem var(--fuente-ui);
+    color: var(--crema);
+    background: rgba(243, 230, 208, 0.06);
+    border: 2px solid rgba(243, 230, 208, 0.35);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.reto-boton--principal {
+    color: #fff;
+    background: #a8322a;
+    border-color: #e8735f;
+}
+
+.reto-boton--elegido {
+    outline: 3px solid #ffd34d;
+    outline-offset: 1px;
+}
+
+.reto-tiempo {
+    height: 6px;
+    margin: 4px 0 6px;
+    overflow: hidden;
+    background: rgba(243, 230, 208, 0.15);
+    border-radius: 3px;
+}
+
+/* Se vacía de derecha a izquierda en los segundos de la invitación */
+.reto-tiempo-relleno {
+    height: 100%;
+    background: #ffd34d;
+    transform-origin: left;
+    animation: reto-vence linear forwards;
+}
+
+@keyframes reto-vence {
+    to {
+        transform: scaleX(0);
+    }
+}
+
+.reto-cuenta {
+    margin: 0 0 12px;
+    text-align: center;
+    font: 0.6rem var(--fuente-pixel);
+    color: rgba(243, 230, 208, 0.7);
+}
+
+/* Puntito con el color del jugador (lista de 👥 Jugadores y menú del reto) */
+.sala-punto {
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+    border: 1px solid #000;
+    border-radius: 50%;
+}
+
+/* ───── Duelo: cuenta 3-2-1-¡YA! y reloj ───── */
+
+.duelo-cuenta {
+    position: absolute;
+    top: 38%;
+    left: 50%;
+    margin: 0;
+    transform: translate(-50%, -50%);
+    font: 4rem var(--fuente-pixel);
+    color: #ffd34d;
+    text-shadow: 4px 4px 0 #7a1f17, -2px -2px 0 #2a1e17, 2px -2px 0 #2a1e17, -2px 2px 0 #2a1e17;
+    animation: duelo-latido 1s ease-out infinite;
+    pointer-events: none;
+}
+
+.duelo-cuenta--ya {
+    color: #fff;
+    text-shadow: 4px 4px 0 #c0392b, -2px -2px 0 #2a1e17, 2px -2px 0 #2a1e17, -2px 2px 0 #2a1e17;
+}
+
+@keyframes duelo-latido {
+    from {
+        transform: translate(-50%, -50%) scale(1.35);
+        opacity: 0.6;
+    }
+}
+
+.duelo-reloj {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    margin: 0;
+    padding: 6px 14px;
+    transform: translateX(-50%);
+    font: 0.65rem var(--fuente-pixel);
+    color: #fff;
+    white-space: nowrap;
+    background: rgba(122, 31, 23, 0.85);
+    border: 2px solid #ffd34d;
+    border-radius: 999px;
+}
+
+/* ─── Cartel de ranking de la arena (parte e) ─── */
+.ranking {
+    width: min(400px, 100%);
+    max-height: calc(100% - 24px);
+    overflow-y: auto;
+    padding: 16px 18px;
+    background: var(--ui);
+    border: 3px double var(--crema);
+    border-radius: 10px;
+    box-shadow: 0 0 0 2px #b8860b, 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+.ranking-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.ranking-titulo {
+    margin: 0;
+    font: 0.85rem var(--fuente-pixel);
+    color: #ffd34d;
+    text-shadow: 2px 2px 0 #7a1f17;
+}
+
+.ranking-sub {
+    margin: 4px 0 12px;
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.ranking-lista {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ranking-fila {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 4px;
+    border-bottom: 1px dashed rgba(243, 230, 208, 0.2);
+}
+
+.ranking-fila:nth-child(-n + 3) {
+    font-weight: 600;
+}
+
+.ranking-pos {
+    width: 2em;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.ranking-nombre {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ranking-victorias {
+    font-size: 0.85rem;
+    color: #ffd34d;
+    white-space: nowrap;
+}
+
+.ranking-vacio {
+    padding: 12px 4px;
+    text-align: center;
+    opacity: 0.8;
+}
+
+/* Anuncio del final del duelo ("🏆 Ana gana", "¡Empate!"): una sola línea, más chico, aparece una vez. */
+.duelo-cuenta--final {
+    top: 22%;
+    max-width: calc(100% - 32px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 10px 18px 12px;
+    font-size: clamp(1rem, 4vw, 1.8rem);
+    background: var(--ui);
+    border: 3px double var(--crema);
+    border-radius: 10px;
+    animation: duelo-anuncio 0.5s ease-out;
+}
+
+@keyframes duelo-anuncio {
+    from {
+        transform: translate(-50%, -50%) scale(1.6);
+        opacity: 0;
+    }
+}

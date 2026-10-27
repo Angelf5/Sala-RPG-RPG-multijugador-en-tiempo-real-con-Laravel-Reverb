@@ -1,0 +1,427 @@
+{
+  "_info": "Biblioteca de Sala RPG. Cada libro tiene páginas cortas (texto + código opcional) y, si aplica, una página final 'En este juego'. Se carga con BibliotecaSeeder.",
+  "estantes": [
+    {
+      "slug": "apis-datos",
+      "nombre": "APIs y Datos",
+      "icono": "📘",
+      "color": "#3b6fd8",
+      "descripcion": "Primer parcial: cliente-servidor, REST, CRUD, ORM y patrones de acceso a datos.",
+      "libros": [
+        {
+          "slug": "cliente-servidor",
+          "titulo": "Cliente-servidor y APIs",
+          "clase": "Clase 2",
+          "paginas": [
+            {"texto": "En la arquitectura cliente-servidor hay dos roles. El CLIENTE (tu navegador, una app de celular) pide cosas. El SERVIDOR (Laravel) las procesa y responde. El cliente nunca toca la base de datos directamente: siempre le pide al servidor."},
+            {"texto": "Una API (Application Programming Interface) es el 'menú' que el servidor ofrece: qué se puede pedir, cómo pedirlo y qué te devuelve. Igual que en un restaurante: no entrás a la cocina, pedís lo que está en la carta."},
+            {"texto": "En la web, el cliente y el servidor se hablan con HTTP: el cliente manda una PETICIÓN (método + URL + datos) y el servidor devuelve una RESPUESTA (código de estado + datos, casi siempre en JSON).", "codigo": "GET /api/libros HTTP/1.1\n\nHTTP/1.1 200 OK\n[{\"id\":1,\"titulo\":\"REST\"}]"}
+          ],
+          "en_este_juego": "Tu navegador es el cliente y Laravel el servidor. Cuando abrís un libro, el juego hace un GET a /libros/{slug} y Laravel responde con el contenido en JSON."
+        },
+        {
+          "slug": "rest",
+          "titulo": "REST y sus principios",
+          "clase": "Clase 5",
+          "paginas": [
+            {"texto": "REST es un estilo para diseñar APIs. La idea central: todo es un RECURSO con su propia URL (/libros, /libros/5, /usuarios/3) y usamos los métodos HTTP para decir qué queremos hacer con él."},
+            {"texto": "Principios clave:\n• Sin estado (stateless): cada petición trae todo lo necesario, el servidor no 'recuerda' la anterior.\n• Interfaz uniforme: mismas reglas para todos los recursos.\n• Cliente y servidor separados: pueden evolucionar por separado.\n• Respuestas cacheables cuando se puede."},
+            {"texto": "Buenas prácticas de URLs: sustantivos en plural, nada de verbos.", "codigo": "✅ GET    /libros\n✅ POST   /libros\n✅ DELETE /libros/5\n❌ GET    /obtenerLibros\n❌ POST   /borrarLibro?id=5"}
+          ],
+          "en_este_juego": "Algunas rutas siguen REST y otras no, a propósito. Siguen: GET /libros/{slug} (un recurso por URL, sustantivo en plural), GET /biblioteca, y GET y POST /chat (leer y crear mensajes en la misma URL, cambiando solo el método). No siguen: /entrar y /salir son verbos porque no representan un recurso sino una acción sobre tu sesión (es la convención de login y logout de Laravel). Y la posición se guarda con POST /posicion y no con PUT porque navigator.sendBeacon, que la manda cuando cerrás la pestaña, solo sabe hacer POST. Tampoco es stateless: Laravel te reconoce en cada petición por la cookie de sesión."
+        },
+        {
+          "slug": "crud-verbos",
+          "titulo": "CRUD y verbos HTTP",
+          "clase": "Clase 6",
+          "paginas": [
+            {"texto": "CRUD son las 4 operaciones básicas sobre datos: Create (crear), Read (leer), Update (actualizar) y Delete (borrar). Casi cualquier sistema es, en el fondo, un montón de CRUDs."},
+            {"texto": "Cada operación tiene su verbo HTTP:", "codigo": "Create → POST   /libros\nRead   → GET    /libros  y  /libros/{id}\nUpdate → PUT    /libros/{id}  (reemplaza todo)\n         PATCH  /libros/{id}  (cambia una parte)\nDelete → DELETE /libros/{id}"},
+            {"texto": "En Laravel, un solo comando arma las 7 rutas del CRUD apuntando a un controlador de recursos:", "codigo": "Route::apiResource('libros', LibroController::class);\n// php artisan route:list  para verlas"}
+          ],
+          "en_este_juego": "Mandar un mensaje en el chat es un CREATE: el juego hace un POST /chat. Leer un libro es un READ: GET /libros/{slug}."
+        },
+        {
+          "slug": "codigos-http",
+          "titulo": "Códigos de estado HTTP",
+          "clase": "Clase 8",
+          "paginas": [
+            {"texto": "Cada respuesta HTTP trae un número de 3 cifras que dice cómo salió todo. El primer dígito es la familia:\n• 2xx → salió bien\n• 3xx → redirección\n• 4xx → el error es del CLIENTE\n• 5xx → el error es del SERVIDOR"},
+            {"texto": "Los que más vas a usar:", "codigo": "200 OK              todo bien\n201 Created         se creó el recurso\n204 No Content      bien, pero no hay nada que devolver\n401 Unauthorized    no sé quién sos (falta login)\n403 Forbidden       sé quién sos, pero no podés\n404 Not Found       no existe\n422 Unprocessable   los datos no pasaron la validación\n429 Too Many Req.   te pasaste del límite\n500 Server Error    explotó algo en el servidor"},
+            {"texto": "Truco para no confundir 401 y 403: 401 es 'mostrame tu DNI', 403 es 'ya vi tu DNI y no estás en la lista'."}
+          ],
+          "en_este_juego": "Si mandás un mensaje vacío, Laravel responde 422. Si mandás demasiados mensajes seguidos, responde 429 y el juego te muestra '¡Más despacio!'."
+        },
+        {
+          "slug": "formatos-datos",
+          "titulo": "JSON, CSV y XML",
+          "clase": "Clase 4",
+          "paginas": [
+            {"texto": "Son tres formas de escribir datos como texto para intercambiarlos entre sistemas.\n• JSON: el estándar de las APIs modernas. Liviano y nativo de JavaScript.\n• CSV: tablas simples, una fila por línea. Ideal para Excel.\n• XML: con etiquetas, más pesado. Común en sistemas viejos o bancarios."},
+            {"texto": "El mismo dato en los tres formatos:", "codigo": "JSON: {\"nombre\":\"Ana\",\"color\":\"rojo\"}\n\nCSV:  nombre,color\n      Ana,rojo\n\nXML:  <jugador>\n        <nombre>Ana</nombre>\n        <color>rojo</color>\n      </jugador>"},
+            {"texto": "En Laravel, devolver un array o un modelo desde un controlador ya lo convierte a JSON automáticamente.", "codigo": "return response()->json($libro);\n// o simplemente:\nreturn $libro;"}
+          ],
+          "en_este_juego": "Todo lo que viaja por Reverb es JSON. Cuando alguien camina, tu navegador recibe algo como {\"id\":7,\"x\":12,\"y\":8,\"dir\":\"izquierda\"}. Los libros de esta biblioteca también están guardados en un archivo JSON."
+        },
+        {
+          "slug": "orm-eloquent",
+          "titulo": "ORM y Eloquent",
+          "clase": "Clase 6",
+          "paginas": [
+            {"texto": "Un ORM (Object-Relational Mapping) traduce entre tablas de la base de datos y objetos de tu código. En vez de escribir SQL a mano, trabajás con clases. En Laravel el ORM se llama Eloquent."},
+            {"texto": "Cada tabla tiene un Modelo. La tabla 'libros' → modelo Libro.", "codigo": "// SQL a mano\nSELECT * FROM libros WHERE estante_id = 2;\n\n// Eloquent\nLibro::where('estante_id', 2)->get();\n\n$libro = Libro::find(5);\n$libro->titulo = 'Nuevo';\n$libro->save();"},
+            {"texto": "Las relaciones entre tablas se declaran como métodos:", "codigo": "class Estante extends Model {\n    public function libros() {\n        return $this->hasMany(Libro::class);\n    }\n}\n\n$estante->libros; // todos sus libros"}
+          ],
+          "en_este_juego": "Esta biblioteca es Eloquent puro: un Estante hasMany Libros. Los libros se cargan desde un seeder y se leen con Libro::where('slug', $slug)->firstOrFail()."
+        },
+        {
+          "slug": "repository",
+          "titulo": "El patrón Repository",
+          "clase": "Clase 7",
+          "paginas": [
+            {"texto": "Un Repository es una clase que se encarga SOLO de buscar y guardar datos. El controlador no sabe si los datos vienen de MySQL, de una API o de un archivo: solo le pide al repositorio."},
+            {"texto": "Ejemplo:", "codigo": "class LibroRepository {\n    public function buscarPorSlug(string $slug): Libro {\n        return Libro::where('slug', $slug)->firstOrFail();\n    }\n}\n\n// en el controlador\npublic function show(string $slug, LibroRepository $repo) {\n    return $repo->buscarPorSlug($slug);\n}"},
+            {"texto": "¿Para qué? Si mañana los libros vienen de otra fuente, cambiás UNA clase y el resto del sistema ni se entera. También facilita los tests: podés reemplazar el repositorio por uno 'falso'."}
+          ],
+          "en_este_juego": "Este juego NO usa repositorios, y es una decisión consciente. Los controladores le hablan directo a Eloquent: BibliotecaController hace Libro::where('slug', $slug)->firstOrFail(). Con una sola fuente de datos (MySQL) y consultas de una línea, un LibroRepository sería una clase más que solo pasa la llamada. Para los tests tampoco hace falta un repositorio falso: corren contra SQLite en memoria (lo configura phpunit.xml) con datos de verdad. Si mañana los libros vinieran de otra API, ahí sí convendría agregarlo."
+        },
+        {
+          "slug": "serializacion",
+          "titulo": "Serialización",
+          "clase": "Clase 7",
+          "paginas": [
+            {"texto": "SERIALIZAR es convertir un objeto en texto (normalmente JSON) para mandarlo por la red o guardarlo. DESERIALIZAR es el camino inverso: de texto a objeto."},
+            {"texto": "En Laravel podés controlar qué campos se serializan, para no exponer datos privados:", "codigo": "class User extends Model {\n    protected $hidden = ['password', 'remember_token'];\n}\n\n// o con API Resources\nreturn new JugadorResource($user);"},
+            {"texto": "En JavaScript:", "codigo": "JSON.stringify({x: 3})  // serializar → '{\"x\":3}'\nJSON.parse('{\"x\":3}')  // deserializar → {x: 3}"}
+          ],
+          "en_este_juego": "Cuando Laravel emite un evento, serializa sus propiedades públicas a JSON con broadcastWith(). Echo, del otro lado, lo deserializa y te lo entrega como objeto."
+        },
+        {
+          "slug": "paginacion",
+          "titulo": "Paginación, filtros y orden",
+          "clase": "Clase 8",
+          "paginas": [
+            {"texto": "Si una tabla tiene 10.000 filas, no las mandás todas juntas. PAGINAR es devolver de a poco (por ejemplo, de a 15). FILTRAR es devolver solo las que cumplen una condición. ORDENAR es elegir el orden."},
+            {"texto": "Con parámetros en la URL:", "codigo": "GET /libros?estante=seguridad&orden=titulo&page=2"},
+            {"texto": "En Laravel:", "codigo": "Libro::query()\n    ->when($request->estante, fn($q, $e) =>\n        $q->whereHas('estante', fn($q) => $q->where('slug', $e)))\n    ->orderBy($request->get('orden', 'titulo'))\n    ->paginate(15);"}
+          ],
+          "en_este_juego": "El historial del chat no se manda entero: cuando entrás, solo recibís los últimos 30 mensajes."
+        }
+      ]
+    },
+    {
+      "slug": "seguridad",
+      "nombre": "Seguridad",
+      "icono": "🔒",
+      "color": "#c0392b",
+      "descripcion": "Arquitectura en capas, autenticación, autorización y protección de APIs.",
+      "libros": [
+        {
+          "slug": "capas",
+          "titulo": "Controladores, servicios y repositorios",
+          "clase": "Clase 11",
+          "paginas": [
+            {"texto": "Separar responsabilidades es que cada clase haga UNA cosa:\n• Controlador: recibe la petición y devuelve la respuesta. Nada más.\n• Servicio: la lógica de negocio (las reglas).\n• Repositorio: el acceso a los datos."},
+            {"texto": "Flujo:", "codigo": "Petición → Controlador → Servicio → Repositorio → BD\n                ↑                                 │\n                └──────── Respuesta ◄─────────────┘"},
+            {"texto": "Un controlador 'gordo' con 200 líneas es una señal de alerta: seguro está haciendo trabajo de servicio o de repositorio. Controladores flacos = código fácil de leer y de testear."}
+          ],
+          "en_este_juego": "El juego separa capas, salvo la de repositorio. Los controladores son flacos: PosicionController no tiene ni un if. La validación vive en Form Requests (EntrarRequest, ChatRequest, PosicionRequest). La lógica de las salas está en un servicio, SalaService: lee el mapa de cada sala (biblioteca y arena) y decide si una celda es caminable. Y el formato del JSON lo arman los Resources (MensajeResource, LibroResource). Flujo de POST /posicion: PosicionRequest valida → PosicionController → SalaService::guardarPosicion() → Eloquent → MySQL. No hay capa de repositorio: mirá el libro 'El patrón Repository' para ver por qué."
+        },
+        {
+          "slug": "errores",
+          "titulo": "Manejo centralizado de errores",
+          "clase": "Clase 12",
+          "paginas": [
+            {"texto": "En vez de poner try/catch en cada método, Laravel tiene un lugar central donde se manejan TODAS las excepciones: bootstrap/app.php, en withExceptions()."},
+            {"texto": "Podés decidir cómo responder a cada tipo de error:", "codigo": "->withExceptions(function (Exceptions $e) {\n    $e->render(function (ModelNotFoundException $ex) {\n        return response()->json(\n            ['mensaje' => 'No existe'], 404);\n    });\n})"},
+            {"texto": "Regla de oro: en producción NUNCA muestres el error real al usuario (APP_DEBUG=false). Un stack trace le regala a un atacante rutas, versiones y nombres de tablas."}
+          ],
+          "en_este_juego": "El lugar central está en bootstrap/app.php, dentro de withExceptions(): ahí se le dice a Laravel que responda los errores en JSON cuando el pedido lo espera (las llamadas del juego mandan Accept: application/json). Por eso, si pedís un libro que no existe, firstOrFail() lanza una excepción y vos recibís un 404 en JSON sin que ningún controlador tenga un try/catch. El único try/catch del proyecto está en ChatController: si Reverb está apagado, el mensaje igual se guarda y queda anotado en el log. En desarrollo el .env tiene APP_DEBUG=true para ver los errores; al publicar la sala para la clase hay que pasarlo a false."
+        },
+        {
+          "slug": "authn-authz",
+          "titulo": "Autenticación vs autorización",
+          "clase": "Clase 12",
+          "paginas": [
+            {"texto": "Se parecen pero son distintas:\n• AUTENTICACIÓN: ¿quién sos? (login, contraseña, token)\n• AUTORIZACIÓN: ¿qué podés hacer? (permisos)\n\nPrimero se autentica, después se autoriza."},
+            {"texto": "Ejemplo de la vida real: en el aeropuerto mostrás el DNI (autenticación) y después tu pasaje dice a qué avión podés subir (autorización)."},
+            {"texto": "En Laravel:", "codigo": "// Autenticación\nAuth::attempt(['email' => $e, 'password' => $p]);\nauth()->user();\n\n// Autorización\nGate::allows('borrar-mensaje', $mensaje);\n$this->authorize('update', $libro);"}
+          ],
+          "en_este_juego": "Al entrar con tu nombre, el juego te AUTENTICA (te loguea). Después, routes/channels.php decide si estás AUTORIZADO a unirte al canal de presencia de cada sala: solo te deja entrar al de la sala donde la base de datos dice que estás. Si intentás unirte a arena.1 estando en la biblioteca, la respuesta es 403."
+        },
+        {
+          "slug": "jwt",
+          "titulo": "JWT: access y refresh tokens",
+          "clase": "Clase 13",
+          "paginas": [
+            {"texto": "Un JWT (JSON Web Token) es un texto firmado que prueba quién sos. Tiene 3 partes separadas por puntos: HEADER.PAYLOAD.FIRMA. El payload se puede leer (no está cifrado), pero no se puede modificar sin romper la firma."},
+            {"texto": "Se usan dos tokens:\n• ACCESS token: dura poco (ej. 15 min). Va en cada petición.\n• REFRESH token: dura mucho (ej. 7 días). Solo sirve para pedir un access token nuevo.\n\nSi te roban el access token, el daño dura minutos.", "codigo": "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOjd9.Xk3..."},
+            {"texto": "Nunca pongas datos sensibles en el payload: cualquiera puede decodificarlo en jwt.io. La firma garantiza que no fue alterado, no que sea secreto."}
+          ],
+          "en_este_juego": "Este juego no usa JWT: es una página web servida por el mismo Laravel, y para eso alcanza la sesión con cookie (Auth::login al entrar). JWT conviene cuando el cliente no es un navegador, por ejemplo una app de celular. Pero hay una idea muy parecida funcionando: cuando entrás al canal sala.1, /broadcasting/auth te devuelve tus datos (channel_data) más una firma HMAC hecha con el REVERB_APP_SECRET. Igual que el payload de un JWT, esos datos se pueden leer, pero si los cambiás la firma ya no coincide y Reverb no te deja entrar."
+        },
+        {
+          "slug": "sesiones-roles",
+          "titulo": "Sesiones, roles y permisos",
+          "clase": "Clase 14",
+          "paginas": [
+            {"texto": "HTTP no tiene memoria. La SESIÓN es cómo el servidor te 'recuerda' entre peticiones: te da una cookie con un ID y guarda tus datos de su lado."},
+            {"texto": "Los ROLES agrupan permisos: en vez de dar 20 permisos a cada usuario, le das un rol ('admin', 'docente', 'alumno') y el rol trae sus permisos."},
+            {"texto": "Ejemplo simple con Gates:", "codigo": "Gate::define('moderar-chat', fn(User $u) =>\n    $u->rol === 'docente');\n\n@can('moderar-chat')\n    <button>Borrar mensaje</button>\n@endcan"}
+          ],
+          "en_este_juego": "El juego usa sesiones de Laravel: por eso si recargás la página seguís logueado con tu personaje."
+        },
+        {
+          "slug": "middleware",
+          "titulo": "Middleware y rutas protegidas",
+          "clase": "Clase 16",
+          "paginas": [
+            {"texto": "Un middleware es un 'filtro' que se ejecuta ANTES (o después) de que la petición llegue al controlador. Pensalo como el patovica de un boliche: revisa en la puerta y decide si pasás."},
+            {"texto": "Se aplica a rutas o grupos:", "codigo": "Route::middleware('auth')->group(function () {\n    Route::get('/sala', [JuegoController::class, 'sala']);\n    Route::post('/chat', [ChatController::class, 'store']);\n});"},
+            {"texto": "Middlewares típicos: auth (estar logueado), throttle (límite de peticiones), verified (email verificado) o los tuyos propios con php artisan make:middleware."}
+          ],
+          "en_este_juego": "La ruta /sala tiene el middleware 'auth'. Por eso si intentás entrar directo sin poner tu nombre, te manda a la pantalla de inicio."
+        },
+        {
+          "slug": "oauth",
+          "titulo": "OAuth y OpenID",
+          "clase": "Clase 16",
+          "paginas": [
+            {"texto": "OAuth es el estándar detrás de 'Iniciar sesión con Google'. Tu app nunca ve la contraseña del usuario: Google lo autentica y le da a tu app un token con permiso limitado."},
+            {"texto": "Flujo simplificado:\n1. El usuario toca 'Entrar con Google'.\n2. Lo redirigís a Google.\n3. Google le pregunta si acepta.\n4. Google lo devuelve a tu app con un código.\n5. Tu servidor cambia el código por un token."},
+            {"texto": "OAuth es para AUTORIZAR acceso. OpenID Connect agrega encima la parte de AUTENTICAR (quién es el usuario). En Laravel se usa el paquete Socialite.", "codigo": "return Socialite::driver('google')->redirect();"}
+          ],
+          "en_este_juego": "Este juego no usa OAuth: para entrar alcanza con un nombre, sin contraseña. Pedirle a 50 personas 'Iniciar sesión con Google' para una clase agregaría un paso y obligaría a registrar la app en Google. El costo de esa simpleza: cualquiera puede elegir cualquier nombre, y si cerrás sesión no hay forma de volver a ser 'el mismo' usuario. Para un sistema real con cuentas, Socialite sería el camino."
+        },
+        {
+          "slug": "owasp",
+          "titulo": "OWASP Top 10 (resumido)",
+          "clase": "Clase 16",
+          "paginas": [
+            {"texto": "OWASP es una organización que publica la lista de los riesgos de seguridad web más comunes. Los que más te van a tocar:\n• Control de acceso roto: usuarios viendo lo que no deben.\n• Inyección (SQL, XSS): datos del usuario ejecutados como código.\n• Fallas criptográficas: contraseñas sin hashear, datos sin cifrar."},
+            {"texto": "• Diseño inseguro y mala configuración: APP_DEBUG=true en producción, contraseñas por defecto.\n• Componentes vulnerables: paquetes desactualizados.\n• Fallas de autenticación: sin límite de intentos, contraseñas débiles.\n• Fallas de registro y monitoreo: te atacan y no te enterás."},
+            {"texto": "Laravel te protege de varias por defecto: Eloquent usa consultas preparadas (anti SQL injection), Blade escapa con {{ }} (anti XSS) y los formularios llevan token CSRF.", "codigo": "{{ $mensaje }}   ✅ escapa el HTML\n{!! $mensaje !!} ⚠️ NO escapa, cuidado"}
+          ],
+          "en_este_juego": "Si alguien escribe <script>alert('hack')</script> en el chat, aparece como texto y no se ejecuta: el juego siempre muestra los mensajes con textContent, nunca con innerHTML."
+        },
+        {
+          "slug": "rate-limiting",
+          "titulo": "Rate limiting",
+          "clase": "Clase 16",
+          "paginas": [
+            {"texto": "Rate limiting es poner un límite a cuántas peticiones puede hacer alguien en un período de tiempo. Protege contra spam, fuerza bruta en el login y abusos que pueden tirar el servidor."},
+            {"texto": "En Laravel se hace con el middleware throttle:", "codigo": "// máximo 10 peticiones por minuto\nRoute::post('/chat', ...)->middleware('throttle:10,1');\n\n// o un limitador con nombre\nRateLimiter::for('chat', fn(Request $r) =>\n    Limit::perMinute(10)->by($r->user()->id));"},
+            {"texto": "Cuando alguien se pasa, Laravel responde 429 Too Many Requests y agrega el header Retry-After con los segundos que tiene que esperar."}
+          ],
+          "en_este_juego": "El chat tiene un límite de 10 mensajes por minuto por jugador. Probalo: si mandás muchos seguidos, vas a ver el aviso '¡Más despacio!'."
+        },
+        {
+          "slug": "cors",
+          "titulo": "CORS",
+          "clase": "Clase 17",
+          "paginas": [
+            {"texto": "Por seguridad, el navegador NO deja que una página de un dominio (ej. mipagina.com) haga peticiones a otro dominio (ej. api.otro.com). Eso se llama Same-Origin Policy."},
+            {"texto": "CORS (Cross-Origin Resource Sharing) es cómo el SERVIDOR dice 'a este otro origen sí le permito'. Lo hace con headers en la respuesta:", "codigo": "Access-Control-Allow-Origin: https://mi-front.com\nAccess-Control-Allow-Methods: GET, POST"},
+            {"texto": "Ojo: CORS lo controla el navegador. Postman o curl lo ignoran. CORS no es una protección del servidor, es una protección para los usuarios de navegadores. En Laravel se configura en config/cors.php."}
+          ],
+          "en_este_juego": "Reverb tiene su propia lista de orígenes permitidos: allowed_origins en config/reverb.php. Cuando publiquemos el juego con el túnel, ahí va la dirección pública."
+        },
+        {
+          "slug": "validacion",
+          "titulo": "Validación y sanitización",
+          "clase": "Clase 17",
+          "paginas": [
+            {"texto": "Regla número uno: NUNCA confíes en lo que manda el cliente. Aunque tu formulario tenga maxlength=80, cualquiera puede mandar una petición a mano con 10.000 caracteres."},
+            {"texto": "VALIDAR es rechazar lo que no cumple las reglas. SANITIZAR es limpiar lo que entra (sacar espacios, escapar HTML).", "codigo": "$datos = $request->validate([\n    'texto'  => ['required', 'string', 'max:80'],\n    'genero' => ['required', 'in:chico,chica'],\n    'color'  => ['required', 'regex:/^#[0-9a-f]{6}$/i'],\n]);"},
+            {"texto": "Si la validación falla, Laravel corta todo y responde 422 con los errores. El controlador ni se entera."}
+          ],
+          "en_este_juego": "Tu nombre (máx. 20), tu género (solo 'chico' o 'chica'), tu color (solo de la paleta) y cada mensaje del chat (máx. 80) se validan en el servidor, aunque el formulario ya los limite."
+        },
+        {
+          "slug": "logging",
+          "titulo": "Logging y auditoría",
+          "clase": "Clase 18",
+          "paginas": [
+            {"texto": "Loguear es dejar registro de lo que pasa en el sistema. Sirve para encontrar errores y para la AUDITORÍA: saber quién hizo qué y cuándo."},
+            {"texto": "En Laravel:", "codigo": "Log::info('Jugador entró', ['id' => $user->id]);\nLog::warning('Límite de chat alcanzado', [...]);\nLog::error('Falló el broadcast', [...]);\n\n// se guarda en storage/logs/laravel.log\n// verlo en vivo: php artisan pail"},
+            {"texto": "Qué NO loguear: contraseñas, tokens, números de tarjeta. Un log filtrado no debería ser un desastre."}
+          ],
+          "en_este_juego": "Cada vez que alguien entra a la sala o supera el límite del chat, queda registrado en storage/logs/laravel.log."
+        },
+        {
+          "slug": "env-credenciales",
+          "titulo": "Credenciales y .env",
+          "clase": "Clase 19",
+          "paginas": [
+            {"texto": "Las contraseñas, claves de API y secretos NUNCA van escritos en el código. Van en el archivo .env, que está en el .gitignore y no se sube a GitHub."},
+            {"texto": "En el código se leen así (solo dentro de los archivos de config/):", "codigo": "// config/services.php\n'clave' => env('MI_API_KEY'),\n\n// en el resto del código\nconfig('services.clave');"},
+            {"texto": "Vite solo expone al navegador las variables que empiezan con VITE_. Así la KEY pública de Reverb llega al JavaScript, pero el SECRET se queda en el servidor.", "codigo": "REVERB_APP_KEY=abc123        ← pública\nREVERB_APP_SECRET=xyz789     ← privada\nVITE_REVERB_APP_KEY=\"${REVERB_APP_KEY}\"  ← copia para el navegador"}
+          ],
+          "en_este_juego": "Abrí las herramientas del navegador (F12) y buscá: vas a encontrar la KEY de Reverb, pero nunca el SECRET. Con el SECRET, Laravel firma cada evento que publica."
+        }
+      ]
+    },
+    {
+      "slug": "tiempo-real",
+      "nombre": "Tiempo Real",
+      "icono": "⚡",
+      "color": "#e6a817",
+      "descripcion": "WebSockets, eventos, canales, presencia y Reverb + Echo.",
+      "libros": [
+        {
+          "slug": "http-vs-websocket",
+          "titulo": "HTTP vs WebSocket",
+          "clase": "Clase 19",
+          "paginas": [
+            {"texto": "HTTP es como mandar cartas: el cliente pregunta, el servidor responde y se corta. El servidor NO puede hablarte si vos no le preguntaste primero."},
+            {"texto": "Antes, para 'simular' tiempo real se usaba POLLING: preguntar cada X segundos '¿hay algo nuevo?'. Funciona, pero desperdicia muchísimas peticiones."},
+            {"texto": "Un WebSocket es como una llamada telefónica: arranca con un 'apretón de manos' HTTP y después la conexión queda ABIERTA. Cualquiera de los dos puede hablar cuando quiera, al instante.", "codigo": "HTTP:      cliente ──pregunta──► servidor\n           cliente ◄─respuesta── servidor  (se corta)\n\nWebSocket: cliente ◄═══════════► servidor  (queda abierta)\n           ws://   (sin cifrar)   wss:// (cifrado)"}
+          ],
+          "en_este_juego": "Apenas termina la pantalla de carga, tu navegador abre UN WebSocket con Reverb y lo mantiene abierto todo el tiempo que juegues. Por ahí te llega todo: movimientos, mensajes y quién entra o sale."
+        },
+        {
+          "slug": "eventos",
+          "titulo": "Arquitectura orientada a eventos",
+          "clase": "Clase 20",
+          "paginas": [
+            {"texto": "En una arquitectura orientada a eventos, las partes del sistema no se llaman directamente entre sí: EMITEN eventos ('pasó tal cosa') y otras partes los ESCUCHAN y reaccionan."},
+            {"texto": "Ventaja: el que emite no necesita saber quién escucha. Podés agregar un oyente nuevo (enviar un mail, guardar un log, avisar por WebSocket) sin tocar el código que emite."},
+            {"texto": "En Laravel un evento es una clase. Si implementa ShouldBroadcast, además viaja por WebSocket:", "codigo": "php artisan make:event MensajeEnviado\n\nclass MensajeEnviado implements ShouldBroadcast {\n    public function broadcastOn(): array {\n        return [new PresenceChannel('sala.1')];\n    }\n}\n\nbroadcast(new MensajeEnviado($msg))->toOthers();"}
+          ],
+          "en_este_juego": "Cuando escribís en el chat, Laravel emite el evento MensajeEnviado. A Laravel no le importa quién lo escucha: Reverb se encarga de repartirlo. Como el chat es de todo el juego, el evento sale por los canales de las dos salas (sala.1 y arena.1): lo ves en el historial estés donde estés, y el globo solo aparece si el que escribió está en tu misma sala."
+        },
+        {
+          "slug": "canales",
+          "titulo": "Canales: públicos, privados y presencia",
+          "clase": "Clase 22",
+          "paginas": [
+            {"texto": "Un CANAL es como un grupo de WhatsApp: los eventos se mandan a un canal y les llegan solo a los suscriptos. Hay tres tipos:\n• PÚBLICO: cualquiera se suscribe, sin login.\n• PRIVADO: hay que estar autorizado.\n• PRESENCIA: privado + sabés QUIÉN más está conectado."},
+            {"texto": "Los privados y de presencia se autorizan en routes/channels.php:", "codigo": "// privado: true o false\nBroadcast::channel('pedidos.{id}', fn($user, $id) =>\n    $user->id === Pedido::find($id)->user_id);\n\n// presencia: devolvés los datos del usuario\nBroadcast::channel('sala.{id}', fn($user) => [\n    'id' => $user->id, 'nombre' => $user->name,\n]);"},
+            {"texto": "Del lado del navegador, con Echo:", "codigo": "Echo.channel('noticias')        // público\nEcho.private('pedidos.5')       // privado\nEcho.join('sala.1')             // presencia\n    .here(users => ...)    // los que ya están\n    .joining(user => ...)  // alguien entra\n    .leaving(user => ...); // alguien se va"}
+          ],
+          "en_este_juego": "Cada sala es un canal de PRESENCIA: sala.1 es la biblioteca y arena.1 la arena. Por eso, apenas entrás, here() te dice quiénes están, y cada vez que alguien llega o se va, joining() y leaving() hacen aparecer o desaparecer su personaje. Al cruzar la puerta, el juego deja un canal y se une al otro sin cortar el WebSocket."
+        },
+        {
+          "slug": "broadcast-sincronizacion",
+          "titulo": "Broadcast y sincronización",
+          "clase": "Clase 22",
+          "paginas": [
+            {"texto": "BROADCAST es mandar un mensaje a muchos a la vez. SINCRONIZAR es lograr que todos vean el mismo estado (las mismas posiciones, los mismos mensajes) aunque estén en computadoras distintas."},
+            {"texto": "Problema típico: el que entra tarde. Los eventos viejos ya pasaron, así que no los recibe. Solución: al entrar, se le manda el ESTADO ACTUAL (por HTTP o en here()) y desde ahí sigue con los eventos en vivo."},
+            {"texto": "toOthers() evita que el que emitió reciba su propio evento (él ya sabe lo que hizo):", "codigo": "broadcast(new MensajeEnviado($msg))->toOthers();\n// requiere que Echo mande el header X-Socket-ID"}
+          ],
+          "en_este_juego": "Tu posición se guarda en la base de datos cada 5 segundos (si te moviste) y al cerrar la pestaña con navigator.sendBeacon: así, si recargás, aparecés donde estabas. Pero ojo: los datos de here() son los de cuando cada uno se unió. Por eso, cuando alguien entra, cada jugador que ya está le responde con un whisper 'estoy' con su posición actual, y el que llega tarde ve a todos donde están ahora."
+        },
+        {
+          "slug": "whisper",
+          "titulo": "Client events (whisper)",
+          "clase": "Clase 23",
+          "paginas": [
+            {"texto": "Normalmente el camino es: navegador → HTTP → Laravel → Reverb → otros navegadores. Pero hay un atajo: los CLIENT EVENTS (en Echo se llaman whisper, 'susurrar'). El navegador manda el mensaje DIRECTO a Reverb, sin pasar por Laravel."},
+            {"texto": "Solo funcionan en canales privados o de presencia (Reverb tiene que saber quién sos).", "codigo": "// mandar\ncanal.whisper('mover', {x: 5, y: 3, dir: 'arriba'});\n\n// recibir\ncanal.listenForWhisper('mover', e => moverJugador(e));"},
+            {"texto": "Ventaja: rapidísimo y no carga a Laravel. Desventaja: Laravel no lo valida, así que el cliente podría mandar cualquier cosa. Se usa para datos efímeros y poco críticos: '¿está escribiendo...?', posición del mouse, movimientos."}
+          ],
+          "en_este_juego": "¡Cada paso que das es un whisper! Con 50 jugadores caminando serían cientos de peticiones HTTP por segundo, demasiado para php artisan serve. Por eso el movimiento va directo por Reverb y el chat, que necesita validación, va por Laravel."
+        },
+        {
+          "slug": "concurrencia",
+          "titulo": "Conexiones concurrentes y escalabilidad",
+          "clase": "Clase 22 y 26",
+          "paginas": [
+            {"texto": "Con HTTP, cada petición abre y cierra. Con WebSockets, cada usuario mantiene una conexión ABIERTA todo el tiempo. 50 usuarios = 50 conexiones vivas a la vez."},
+            {"texto": "El costo crece rápido: si 50 personas mandan 1 mensaje, el servidor tiene que repartir 50 × 49 = 2.450 mensajes. Técnicas para aguantar:\n• Mandar solo cuando algo cambia (no cada frame).\n• Limitar la frecuencia (throttle).\n• Mensajes chicos.\n• Dividir en canales/salas."},
+            {"texto": "Para muchos más usuarios, Reverb puede escalar horizontalmente: varios servidores Reverb conectados entre sí con Redis.", "codigo": "REVERB_SCALING_ENABLED=true\n# todos los servidores comparten eventos vía Redis"}
+          ],
+          "en_este_juego": "Tu personaje solo avisa cuando da un paso, y como máximo 8 veces por segundo. Si estás quieto, no gasta nada de red."
+        },
+        {
+          "slug": "reconexion",
+          "titulo": "Estado de conexión y reconexión",
+          "clase": "Clase 23",
+          "paginas": [
+            {"texto": "Las conexiones se caen: el wifi parpadea, la notebook se suspende, el servidor se reinicia. Una app de tiempo real tiene que DETECTARLO y RECONECTARSE sola."},
+            {"texto": "Pusher-js (lo que usa Echo por debajo) ya reintenta automáticamente. Vos podés escuchar los cambios de estado para avisarle al usuario:", "codigo": "Echo.connector.pusher.connection.bind('state_change',\n  ({ current }) => {\n    // connecting | connected | unavailable | disconnected\n    actualizarIcono(current);\n  });"},
+            {"texto": "Al reconectar, puede que te hayas perdido eventos. Por eso conviene volver a pedir el estado actual."}
+          ],
+          "en_este_juego": "El ícono de wifi de arriba a la derecha está conectado a ese state_change: verde = conectado, amarillo = reconectando, rojo = sin conexión. Probá apagar Reverb y mirá qué pasa."
+        },
+        {
+          "slug": "reverb-echo",
+          "titulo": "Reverb y Echo: cómo viaja un mensaje",
+          "clase": "Material de cátedra",
+          "paginas": [
+            {"texto": "Son dos piezas:\n• REVERB (backend): servidor WebSocket en PHP. Se arranca aparte con php artisan reverb:start, escucha en el puerto 8080 y sabe qué navegador está suscripto a qué canal.\n• ECHO (frontend): librería JavaScript que abre UNA conexión con Reverb y te deja suscribirte a canales y escuchar eventos."},
+            {"texto": "Laravel y Reverb son DOS PROCESOS distintos. Laravel atiende HTTP y, cuando hay que emitir algo, se lo pasa a Reverb firmado con el SECRET. Reverb es el único que habla con los navegadores por WebSocket.", "codigo": "Navegador ──POST /chat──► Laravel (puerto 8000)\n                              │ HTTP firmado con SECRET\n                              ▼\n                          Reverb (puerto 8080)\n                              │ WebSocket\n              ┌───────────────┼───────────────┐\n              ▼               ▼               ▼\n          Navegador       Navegador       Navegador"},
+            {"texto": "Checklist cuando 'no llega nada':\n1. ¿Está corriendo php artisan reverb:start?\n2. ¿BROADCAST_CONNECTION=reverb en el .env?\n3. ¿QUEUE_CONNECTION=sync (o un queue:work corriendo)?\n4. ¿Reiniciaste npm run dev después de tocar el .env?\n5. Si usás broadcastAs(), ¿escuchás con un punto adelante? .listen('.MiEvento')"}
+          ],
+          "en_este_juego": "Este juego necesita tres terminales abiertas: php artisan serve, php artisan reverb:start y npm run dev. Si cerrás la de Reverb, el wifi se pone rojo y dejás de ver a los demás."
+        },
+        {
+          "slug": "duelos-arbitro",
+          "titulo": "Duelos: ¿quién es el árbitro?",
+          "clase": "Material de cátedra",
+          "paginas": [
+            {"texto": "En un juego en red, cada navegador corre su propia copia del juego. Si cada uno decide quién ganó, tarde o temprano dos copias no van a coincidir… o alguien va a abrir la consola y escribir vidas = 99.\nLa pregunta de diseño es: ¿quién es el ÁRBITRO? Hay dos extremos:\n• CLIENT-AUTHORITATIVE: decide el navegador. Rápido, pero se puede trampear.\n• SERVER-AUTHORITATIVE: decide el servidor. Más lento (ida y vuelta), pero es la única verdad."},
+            {"texto": "Casi ningún juego es puro: se reparte. Lo que es EFÍMERO o solo VISUAL lo decide el cliente; lo que CUENTA (puntos, vidas, quién ganó) lo decide el servidor.\nRegla práctica: preguntate '¿qué pasa si un tramposo miente en esto?'. Si la respuesta es 'se ve raro un ratito', que lo decida el cliente. Si es 'gana un duelo que no ganó', servidor.", "codigo": "CLIENTE (whisper, sin Laravel)     SERVIDOR (HTTP + base de datos)\n─────────────────────────────     ───────────────────────────────\n• moverse paso a paso             • ¿existe el duelo? ¿está activo?\n• la animación del espadazo        • ¿sos uno de los dos? (Policy)\n• ¿tengo al rival enfrente?       • cooldown entre golpes\n• no salirme del ring             • invulnerable después de un golpe\n                                  • cuántas ❤️ quedan y quién ganó"},
+            {"texto": "El servidor no puede creerle al cliente, así que VALIDA cada golpe en orden y, si algo falla, lo rechaza con un código HTTP:\n• 403 si no sos parte del duelo.\n• 422 si el duelo no está activo, si te golpeás a vos mismo o si se terminó el tiempo.\n• 429 si golpeás más rápido que el cooldown.\nY usa una transacción con lockForUpdate(): si llegan dos golpes al mismo tiempo, el segundo espera al primero y nunca se descuentan mal las vidas.", "codigo": "// (simplificado; el real está en app/Services/DueloService.php)\nDB::transaction(function () use ($duelo) {\n    $duelo = Duelo::lockForUpdate()->find($duelo->id);\n    if ($duelo->estado !== 'activo') throw ...; // 422\n    if ($muyRapido) throw new TooManyRequestsHttpException(); // 429\n    $duelo->decrement('vidas_retado');\n});"},
+            {"texto": "¿Y el final? Tampoco lo decide el navegador.\n• POR TIEMPO: cuando tu reloj llega a 0, le PEDÍS al servidor que cierre el duelo. Él mira SU reloj: si todavía faltan segundos, contesta 422 y no pasa nada.\n• POR DESCONEXIÓN: que te llegue un leaving() no alcanza (pudo ser un corte de wifi, o un cliente mentiroso). El servidor le pregunta a Reverb por su API HTTP quién está en el canal, y solo si el rival de verdad no está, te da la victoria.\nEl resultado se guarda en la tabla duelos y se avisa a todos con un evento."}
+          ],
+          "en_este_juego": "En la arena, el movimiento y la animación de la espada viajan por whisper (los decide tu navegador), pero cada golpe es un POST /duelos/{id}/golpe que el servidor valida: duelo activo, que seas parte (DueloPolicy), cooldown de 600 ms (429), 800 ms de invulnerabilidad y 3 ❤️, todo con lockForUpdate. El fin por tiempo (60 s) y por desconexión también lo decide DueloService; el abandono se confirma preguntándole a Reverb. Trade-off honesto: como las posiciones van por whisper, el servidor no chequea que el rival esté enfrente."
+        }
+      ]
+    },
+    {
+      "slug": "despliegue",
+      "nombre": "Despliegue",
+      "icono": "🚀",
+      "color": "#27ae60",
+      "descripcion": "GraphQL, CI/CD, entornos y testing.",
+      "libros": [
+        {
+          "slug": "graphql",
+          "titulo": "GraphQL vs REST",
+          "clase": "Clase 26-28",
+          "paginas": [
+            {"texto": "En REST hay muchas URLs y cada una devuelve una forma fija de datos. En GraphQL hay UNA sola URL y el cliente pide EXACTAMENTE los campos que quiere."},
+            {"texto": "Ejemplo: quiero el nombre de un estante y los títulos de sus libros.", "codigo": "# REST: 2 peticiones, y me trae campos de más\nGET /estantes/2\nGET /estantes/2/libros\n\n# GraphQL: 1 petición, solo lo que pido\nquery {\n  estante(id: 2) {\n    nombre\n    libros { titulo }\n  }\n}"},
+            {"texto": "Conceptos: el SCHEMA define tipos y campos. Las QUERIES leen, las MUTATIONS modifican y los RESOLVERS son las funciones que buscan cada dato. En Laravel se usa el paquete Lighthouse."}
+          ],
+          "en_este_juego": "Este juego usa REST, no GraphQL. El problema del ejemplo (pedir el nombre de un estante y los títulos de sus libros) acá se resuelve con una sola petición REST: GET /biblioteca devuelve los 4 estantes con los títulos de sus libros, sin las páginas, y Laravel los busca en dos consultas gracias a with('libros'). Con pocas pantallas y datos que ya conocemos de antemano, GraphQL no compensaría tener que armar un schema y resolvers."
+        },
+        {
+          "slug": "ci-cd",
+          "titulo": "CI/CD",
+          "clase": "Clase 29",
+          "paginas": [
+            {"texto": "CI (Integración Continua): cada vez que alguien sube código, se ejecutan automáticamente los tests. Si algo se rompe, te enterás en minutos y no el día de la entrega."},
+            {"texto": "CD (Despliegue Continuo): si los tests pasan, el código se publica solo en el servidor. Sin copiar archivos a mano por FTP."},
+            {"texto": "Un pipeline típico con GitHub Actions:", "codigo": "on: push\njobs:\n  tests:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - run: composer install\n      - run: php artisan test"}
+          ],
+          "en_este_juego": "Este proyecto todavía no tiene CI ni CD: los tests (php artisan test) se corren a mano antes de cerrar cada etapa, y la publicación es manual (Apache de XAMPP + Cloudflare Tunnel). Agregar CI sería subir el repositorio a GitHub y crear .github/workflows/tests.yml como el del ejemplo. Los tests ya usan SQLite en memoria, así que correrían en GitHub sin necesidad de MySQL."
+        },
+        {
+          "slug": "entornos",
+          "titulo": "Entornos: dev, staging y producción",
+          "clase": "Clase 30-31",
+          "paginas": [
+            {"texto": "• DESARROLLO (local): tu compu. Errores visibles, datos de prueba.\n• STAGING: copia de producción para probar antes de publicar.\n• PRODUCCIÓN: lo que usan los usuarios reales. Nada se prueba acá."},
+            {"texto": "Cada entorno tiene su propio .env con valores distintos:", "codigo": "# local\nAPP_ENV=local\nAPP_DEBUG=true\nREVERB_SCHEME=http\n\n# producción\nAPP_ENV=production\nAPP_DEBUG=false\nREVERB_SCHEME=https"},
+            {"texto": "VERSIONADO y ROLLBACK: cada publicación tiene una versión (v1.2.0). Si la nueva falla, volvés a la anterior. Git tags y las migraciones con down() lo hacen posible."}
+          ],
+          "en_este_juego": "Para jugar con tus compañeros desde sus casas, el juego se publica con un túnel de Cloudflare: cambia REVERB_SCHEME a https y la conexión pasa a ser wss://, cifrada."
+        },
+        {
+          "slug": "testing",
+          "titulo": "Testing automatizado",
+          "clase": "Clase 32",
+          "paginas": [
+            {"texto": "Tres niveles:\n• UNITARIO: prueba una función aislada.\n• INTEGRACIÓN: prueba varias partes juntas (controlador + base de datos).\n• END-TO-END: simula un usuario real usando la app en un navegador."},
+            {"texto": "En Laravel los tests de 'feature' prueban rutas completas:", "codigo": "public function test_chat_rechaza_mensaje_vacio(): void\n{\n    $user = User::factory()->create();\n\n    $this->actingAs($user)\n         ->postJson('/chat', ['texto' => ''])\n         ->assertStatus(422);\n}"},
+            {"texto": "Se ejecutan con php artisan test. Para eventos de broadcast se puede usar Event::fake() y comprobar que se emitieron, sin necesitar Reverb prendido."}
+          ],
+          "en_este_juego": "El proyecto incluye tests: que no se pueda entrar a la sala sin login, que el chat rechace mensajes vacíos o largos, y que respete el límite de 10 por minuto."
+        }
+      ]
+    }
+  ]
+}

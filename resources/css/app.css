@@ -1,0 +1,13 @@
+@import 'tailwindcss';
+
+@source '../../storage/framework/views/*.php';
+
+/* "inline" porque las variables --font-poppins y --font-press-start las genera @fonts */
+@theme inline {
+    --font-sans: var(--font-poppins, "Poppins"), ui-sans-serif, system-ui, sans-serif, 'Segoe UI Emoji';
+    --font-pixel: var(--font-press-start, "Press Start 2P"), monospace;
+}
+
+.pixelado {
+    image-rendering: pixelated;
+}

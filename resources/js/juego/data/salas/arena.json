@@ -1,0 +1,40 @@
+{
+    "_info": "Arena de duelos: 30×20 celdas de 32 px. Se entra por la puerta de abajo de la biblioteca; el portón de arriba vuelve. 'o' es el ring (caminable).",
+    "nombre": "la arena",
+    "ancho": 30,
+    "alto": 20,
+    "spawn": { "x": 15, "y": 2, "dir": "abajo" },
+    "filas": [
+        "##############@@##############",
+        "#wwwwiwwwwwiwwaawwRRRRwwiwwww#",
+        "#wwwwwwwwwwwwwaawwRRRRwwwwwww#",
+        "#aaaaaaaaaaaaaaaaaaaaaaaaaaaa#",
+        "#afaaaaaaaaaaaaaaaaaaaaaaaafa#",
+        "#aaaaaaaaaaaaaaaaaaaaaaaaaaaa#",
+        "#aaaaaaaaaaaaaaaaaaaaaaaaaaaa#",
+        "#aaaaaaaaooooooooooooaaaaaaaa#",
+        "#aaaaaaaaooooooooooooaaaaaaaa#",
+        "#aaaaaaaaooooooooooooaaaaaaaa#",
+        "#aaaaaaaaooooooooooooaaaaaaaa#",
+        "#aaaaaaaaooooooooooooaaaaaaaa#",
+        "#aaaaaaaaooooooooooooaaaaaaaa#",
+        "#aaaaaaaaaaaaaaaaaaaaaaaaaaaa#",
+        "#aaaaaaaaaaaaaaaaaaaaaaaaaaaa#",
+        "#aaaaaaaahhhhaaaahhhhaaaaaaaa#",
+        "#aaaaaaaaaaaaaaaaaaaaaaaaaaaa#",
+        "#afaaaaaaaaaaaaaaaaaaaaaaaafa#",
+        "#aaaaaaaaaaaaaaaaaaaaaaaaaaaa#",
+        "##############################"
+    ],
+    "leyenda": {
+        "#": { "caminable": false, "tipo": "borde" },
+        "w": { "caminable": false, "tipo": "muro" },
+        "i": { "caminable": false, "tipo": "antorcha" },
+        "R": { "caminable": false, "tipo": "ranking" },
+        "f": { "caminable": false, "tipo": "brasero" },
+        "h": { "caminable": false, "tipo": "banco" },
+        "a": { "caminable": true, "tipo": "arena" },
+        "o": { "caminable": true, "tipo": "ring" },
+        "@": { "caminable": false, "tipo": "puerta", "destino": { "sala": "biblioteca", "y": 18, "dir": "arriba" } }
+    }
+}
